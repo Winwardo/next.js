@@ -47,6 +47,10 @@ export function createErrorHandler({
     if (dev) {
       formatServerError(err)
     }
+
+    // TODO-APP: look at using webcrypto instead. Requires a promise to be awaited.
+    const errorDigest = stringHash(err.message + err.stack + (err.digest || '')).toString()
+
     // Used for debugging error source
     // console.error(_source, err)
     // Don't log the suppressed error during export
@@ -81,14 +85,13 @@ export function createErrorHandler({
             logAppDirError(err)
           }
           if (process.env.NODE_ENV === 'production') {
-            console.error(err)
+            console.error(errorDigest, err)
           }
         }
       }
     }
 
     capturedErrors.push(err)
-    // TODO-APP: look at using webcrypto instead. Requires a promise to be awaited.
-    return stringHash(err.message + err.stack + (err.digest || '')).toString()
+    return errorDigest;
   }
 }
